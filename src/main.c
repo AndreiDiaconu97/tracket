@@ -1,13 +1,14 @@
+#include "driver/gpio.h"
 #include "esp_spi_flash.h"
-#include "esp_system.h"
+//#include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "sdkconfig.h"
 #include <stdio.h>
 
-void app_main(void) {
-    printf("Hello world!\n");
+#define BLINK_GPIO 32
 
+void get_chip_info_task(void *args) {
     /* Print chip information */
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
@@ -30,5 +31,21 @@ void app_main(void) {
     }
     printf("Restarting now.\n");
     fflush(stdout);
-    esp_restart();
+}
+
+void blink_task(void *args) {
+    gpio_pad_select_gpio(BLINK_GPIO);
+    gpio_set_direction(BLINK_GPIO, GPIO_MODE_OUTPUT);
+    while (1) {
+        gpio_set_level(BLINK_GPIO, 0);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        gpio_set_level(BLINK_GPIO, 1);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+}
+
+void app_main(void) {
+    printf("Hello world!\n");
+    xTaskCreate(&blink_task, "blink_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
+    //xTaskCreate(&get_chip_info_task, "chip_info_task", configMINIMAL_STACK_SIZE, NULL, 5, NULL);
 }
