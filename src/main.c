@@ -1,7 +1,11 @@
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "rotator.h"
 #include "sdkconfig.h"
+
+struct rotator rotator_RA;
+struct rotator rotator_DEC;
 
 void task_1(void *args) {
     printf("[%d] %s\n", xTaskGetTickCount(), pcTaskGetTaskName(NULL));
@@ -21,6 +25,8 @@ void task_2(void *args) {
 }
 
 void app_main(void) {
-    printf("START\n");
+    rotator__init(&rotator_RA);
+    printf("START %f\n", rotator_RA.x);
+    printf("START %f\n", rotator_DEC.x);
     xTaskCreate(task_2, "task_2", 2048, NULL, 5, NULL);
 }
