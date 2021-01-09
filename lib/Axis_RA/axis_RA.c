@@ -1,4 +1,4 @@
-#include "rotator.h"
+#include "axis_RA.h"
 
 void rotator__init(struct rotator *self) {
     // TODO: load fron config file
