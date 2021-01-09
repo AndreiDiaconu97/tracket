@@ -1,10 +1,8 @@
-#include "axis_RA.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 #include "sdkconfig.h"
-#include "validate.h"
 #include <stdio.h>
 
 #define ESP_INTR_FLAG_DEFAULT 0
