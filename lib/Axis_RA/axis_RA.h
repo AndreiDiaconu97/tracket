@@ -1,14 +1,36 @@
 #ifndef AXIS_RA_H
 #define AXIS_RA_H
 
-struct Axis_RA {
-    float x;
-    float y;
-};
+#include "driver/gpio.h"
+#include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+#include "freertos/task.h"
 
-void Axis_RA__init(struct Axis_RA *self);
-void Axis_RA__setCoordinates(struct Axis_RA *self, float x, float y);
-float Axis_RA__getXCoordinate(struct Axis_RA *self);
-float Axis_RA__getYCoordinate(struct Axis_RA *self);
+SemaphoreHandle_t  stepSemaphore;
+esp_timer_handle_t task_track_timer;
+
+typedef enum { Start,
+               Resume,
+               Stop,
+               Delete
+} track_op;
+
+typedef struct {
+    int  pinStep, pinDir, pinEnable; // driver pins
+    bool dir, step;
+    bool isEnabled;
+    int  pos;   // steps (should convert to some astronomical unit)
+    int  speed; // step/s (should convert to some astronomical unit)
+    int  stepTime;
+} Axis_RA;
+
+void Axis_RA__init(Axis_RA *self, int pinDir, int pinStep, int pinEnable);
+void Axis_RA__task_track(Axis_RA *self);
+void Axis_RA__task_track_handle(Axis_RA *self, TaskHandle_t handle, track_op operation);
+
+void Axis_RA__driver_enable(Axis_RA *self, bool toEnable);
+void Axis_RA__driver_direction(Axis_RA *self, bool dir);
+void Axis_RA__driver_speed(Axis_RA *self, int speed);
 
 #endif

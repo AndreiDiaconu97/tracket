@@ -1,55 +1,24 @@
 #include "axis_RA.h"
-#include "driver/gpio.h"
+#include "config.h"
 #include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
 #include "freertos/task.h"
+#include "globals.h"
 #include "sdkconfig.h"
 #include "validate.h"
-#include <stdio.h>
+//#include <stdio.h>
 
-#define ESP_INTR_FLAG_DEFAULT 0
-#define CONFIG_BUTTON_PIN 0
-
-TaskHandle_t myTask1Handle = NULL;
-TaskHandle_t myTask2Handle = NULL;
-SemaphoreHandle_t xSemaphore = NULL;
-TaskHandle_t ISR = NULL;
-
-void IRAM_ATTR button_isr_handler(void *arg) {
-    xSemaphoreGiveFromISR(xSemaphore, NULL);
-}
-
-void task1(void *arg) {
-    while (1) {
-        vTaskDelay(pdMS_TO_TICKS(5000));
-        printf("hello from task 1 [%d]\n", xTaskGetTickCount());
-        xSemaphoreGive(xSemaphore);
-    }
-}
-
-void task2(void *arg) {
-    while (1) {
-        vTaskDelay(pdMS_TO_TICKS(100));
-        printf("waiting the button!\n");
-        if (xSemaphoreTake(xSemaphore, portMAX_DELAY)) {
-            printf("got message! [%d] \n", xTaskGetTickCount());
-        }
-    }
-}
+TaskHandle_t axis_RA_track_handle = NULL;
+Axis_RA      axis_RA;
 
 void app_main() {
-    printf("START\n");
+    printf("[%d] START\n", xTaskGetTickCount());
+    Axis_RA__init(&axis_RA, AXIS_RA_PIN_DIR, AXIS_RA_PIN_STEP, AXIS_RA_PIN_ENABLE);
+    xTaskCreate((void *)Axis_RA__task_track, "task_track_RA", 2048, &axis_RA, 5, axis_RA_track_handle);
 
-    gpio_pad_select_gpio(CONFIG_BUTTON_PIN);
-    gpio_set_direction(CONFIG_BUTTON_PIN, GPIO_MODE_INPUT);
+    Axis_RA__driver_speed(&axis_RA, 500);
+    Axis_RA__task_track_handle(&axis_RA, axis_RA_track_handle, Start);
 
-    gpio_set_intr_type(CONFIG_BUTTON_PIN, GPIO_INTR_NEGEDGE); // enable interrupt on falling (1->0) edge for button pin
-
-    //Install the drivers GPIO ISR handler service, which allows per-pin GPIO interrupt handlers.
-    gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);                   // install ISR service with default configuration
-    gpio_isr_handler_add(CONFIG_BUTTON_PIN, button_isr_handler, NULL); // attach the interrupt service routine
-
-    xSemaphore = xSemaphoreCreateBinary();
-    xTaskCreate(task1, "task1", 4096, NULL, 10, &myTask1Handle);
-    xTaskCreatePinnedToCore(task2, "task2", 4096, NULL, 10, &myTask2Handle, 1);
+    //Axis_RA__task_track_handle(&axis_RA, axis_RA_track_handle, Start);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    Axis_RA__task_track_handle(&axis_RA, axis_RA_track_handle, Delete);
 }
