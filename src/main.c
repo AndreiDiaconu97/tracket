@@ -7,16 +7,14 @@
 #include "validate.h"
 //#include <stdio.h>
 
-TaskHandle_t axis_RA_track_handle = NULL;
-Axis_RA      axis_RA;
+Axis_RA axis_RA;
 
 void app_main() {
     printf("[%d] START\n", xTaskGetTickCount());
     Axis_RA__init(&axis_RA, AXIS_RA_PIN_DIR, AXIS_RA_PIN_STEP, AXIS_RA_PIN_ENABLE);
-    xTaskCreate((void *)Axis_RA__task_track, "task_track_RA", 2048, &axis_RA, 5, axis_RA_track_handle);
+    xTaskCreate((void *)Axis_RA__task_track, "task_track_RA", 2048, &axis_RA, 5, &axis_RA_track_handle);
 
     Axis_RA__driver_speed(&axis_RA, 500);
-    Axis_RA__task_track_handle(&axis_RA, axis_RA_track_handle, Start);
 
     //Axis_RA__task_track_handle(&axis_RA, axis_RA_track_handle, Start);
     vTaskDelay(pdMS_TO_TICKS(1000));

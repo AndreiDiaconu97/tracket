@@ -7,7 +7,7 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 
-SemaphoreHandle_t  stepSemaphore;
+TaskHandle_t       axis_RA_track_handle;
 esp_timer_handle_t task_track_timer;
 
 typedef enum { Start,

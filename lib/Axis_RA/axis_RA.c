@@ -38,7 +38,7 @@ void Axis_RA__driver_speed(Axis_RA *self, int speed) {
 }
 
 void IRAM_ATTR task_track_isr_handler(void *arg) {
-    xSemaphoreGiveFromISR(stepSemaphore, NULL);
+    xTaskNotifyFromISR(axis_RA_track_handle, 1, eSetValueWithOverwrite, NULL);
 }
 
 void Axis_RA__task_track_handle(Axis_RA *self, TaskHandle_t task_track_handle, track_op operation) {
@@ -50,17 +50,7 @@ void Axis_RA__task_track_handle(Axis_RA *self, TaskHandle_t task_track_handle, t
 
     switch (operation) {
     case Start:
-        printf("[%d] START TRACKING\n", xTaskGetTickCount());
-        stepSemaphore = xSemaphoreCreateBinary();
 
-        // set timer
-        const esp_timer_create_args_t task_track_timer_args = {
-            .callback = &task_track_isr_handler,
-            .name     = "task_track_timer" // name is optional, but may help identify the timer when debugging
-        };
-        ESP_ERROR_CHECK(esp_timer_create(&task_track_timer_args, &task_track_timer));
-        ESP_ERROR_CHECK(esp_timer_start_periodic(task_track_timer, self->stepTime));
-        Axis_RA__driver_enable(self, true);
         break;
     case Resume:
         printf("[%d] RESUME TRACKING\n", xTaskGetTickCount());
@@ -88,8 +78,21 @@ void Axis_RA__task_track_handle(Axis_RA *self, TaskHandle_t task_track_handle, t
 }
 
 // FIXME - number of steps is not precise
+// TODO - change from semaphore to signal notification (40% faster)
+// TODO - being a task makes no more sense, leave it to timer interrupts
 void Axis_RA__task_track(Axis_RA *self) {
-    while (xSemaphoreTake(stepSemaphore, portMAX_DELAY)) {
+    printf("[%d] START TRACKING\n", xTaskGetTickCount());
+
+    // set timer
+    const esp_timer_create_args_t task_track_timer_args = {
+        .callback = &task_track_isr_handler,
+        .name     = "task_track_timer" // name is optional, but may help identify the timer when debugging
+    };
+    ESP_ERROR_CHECK(esp_timer_create(&task_track_timer_args, &task_track_timer));
+    ESP_ERROR_CHECK(esp_timer_start_periodic(task_track_timer, self->stepTime));
+    Axis_RA__driver_enable(self, true);
+
+    while (xTaskNotifyWait(0, ULONG_MAX, NULL, portMAX_DELAY)) {
         self->step = !self->step;
         gpio_set_level(self->pinStep, self->step);
 
