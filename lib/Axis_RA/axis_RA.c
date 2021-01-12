@@ -3,7 +3,7 @@
 typedef struct {
     int  pinStep, pinDir, pinEnable; // driver pins
     bool dir, step;
-    bool isEnabled;
+    bool isEnabled, isRunning;
     int  pos;   // steps (should convert to some astronomical unit)
     int  speed; // step/s (should convert to some astronomical unit)
     int  stepTime;
@@ -12,20 +12,21 @@ typedef struct {
 // Private functions
 void IRAM_ATTR tracker_isr(Axis_RA *self);
 
-void Axis_RA_init(Axis_RA *self, Axis_RA_config *config);
+void Axis_RA_init(Axis_RA *self, Axis_RA_conf *config);
 void Axis_RA__driver_enable(Axis_RA *self, bool toEnable);
 void Axis_RA__driver_direction(Axis_RA *self, bool dir);
 void Axis_RA__driver_speed(Axis_RA *self, int speed);
 
-void TSK_tracker(Axis_RA_config *config);
-void TSK_tracker_command(Axis_RA *axis_RA, esp_timer_handle_t tracker_timer, tracker_cmd cmd);
+void TSK_tracker(Axis_RA_conf *config);
+void TSK_tracker_cmd(Axis_RA *axis_RA, esp_timer_handle_t tracker_timer, tracker_cmd cmd);
 
-void Axis_RA_init(Axis_RA *self, Axis_RA_config *config) {
+void Axis_RA_init(Axis_RA *self, Axis_RA_conf *config) {
     self->pinStep   = config->pinStep;
     self->pinDir    = config->pinDir;
     self->pinEnable = config->pinEnable;
     self->pos       = config->pos;
     self->step      = false;
+    self->isRunning = false;
 
     gpio_pad_select_gpio(self->pinDir);
     gpio_pad_select_gpio(self->pinStep);
@@ -55,14 +56,14 @@ void Axis_RA__driver_speed(Axis_RA *self, int speed) {
     self->stepTime = 1000000 / 2 / self->speed;
 }
 
-TaskHandle_t TSK_tracker_init(Axis_RA_config *config) {
+TaskHandle_t TSK_tracker_init(Axis_RA_conf *config) {
     TaskHandle_t axis_RA_tracker_handle;
-    xTaskCreate((void *)TSK_tracker, "TSK_tracker", 2048, config, 5, &axis_RA_tracker_handle);
+    xTaskCreate((void *)TSK_tracker, "tracker", 2048, config, 5, &axis_RA_tracker_handle);
     return axis_RA_tracker_handle;
 }
 
-void TSK_tracker(Axis_RA_config *config) {
-    printf("[%d] INIT TRACKER\n", xTaskGetTickCount());
+void TSK_tracker(Axis_RA_conf *config) {
+    printf("[%s][%dms] Init\n", pcTaskGetTaskName(NULL), xTaskGetTickCount() * 10);
 
     Axis_RA axis_RA;
     Axis_RA_init(&axis_RA, config);
@@ -79,10 +80,10 @@ void TSK_tracker(Axis_RA_config *config) {
     // wait for command
     uint32_t command;
     while (xTaskNotifyWait(0, ULONG_MAX, &command, portMAX_DELAY)) {
-        TSK_tracker_command(&axis_RA, tracker_timer, command);
+        TSK_tracker_cmd(&axis_RA, tracker_timer, command);
     }
 
-    TSK_tracker_command(&axis_RA, tracker_timer, Error); // Should never get here
+    TSK_tracker_cmd(&axis_RA, tracker_timer, Error); // Should never get here
 }
 
 // Constant steps at specified speed
@@ -95,25 +96,47 @@ void IRAM_ATTR tracker_isr(Axis_RA *axis_RA) {
     }
 }
 
-void TSK_tracker_command(Axis_RA *axis_RA, esp_timer_handle_t tracker_timer, tracker_cmd cmd) {
-    printf("[%s] received command %d\n", pcTaskGetTaskName(NULL), cmd);
-    printf("[%s] pos: %d\n", pcTaskGetTaskName(NULL), axis_RA->pos);
+void TSK_tracker_cmd(Axis_RA *axis_RA, esp_timer_handle_t tracker_timer, tracker_cmd cmd) {
+    printf("[%s][%dms] pos: %d\n", pcTaskGetTaskName(NULL), xTaskGetTickCount() * 10, axis_RA->pos);
 
     switch (cmd) {
     case Start:
-        printf("[%d] START TRACKER\n", xTaskGetTickCount());
-        Axis_RA__driver_enable(axis_RA, true);
-        ESP_ERROR_CHECK(esp_timer_start_periodic(tracker_timer, axis_RA->stepTime));
+        if (axis_RA->isRunning) {
+            printf("[%s][%dms] Already started \n", pcTaskGetTaskName(NULL), xTaskGetTickCount() * 10);
+        } else {
+            printf("[%s][%dms] Start\n", pcTaskGetTaskName(NULL), xTaskGetTickCount() * 10);
+            Axis_RA__driver_enable(axis_RA, true);
+            axis_RA->isRunning = true;
+            ESP_ERROR_CHECK(esp_timer_start_periodic(tracker_timer, axis_RA->stepTime));
+        }
         break;
     case Stop:
-        printf("[%d] STOP TRACKER\n", xTaskGetTickCount());
-        ESP_ERROR_CHECK(esp_timer_stop(tracker_timer));
-        Axis_RA__driver_enable(axis_RA, false);
+        if (axis_RA->isRunning) {
+            ESP_ERROR_CHECK(esp_timer_stop(tracker_timer));
+            printf("[%s][%dms] Stop \n", pcTaskGetTaskName(NULL), xTaskGetTickCount() * 10);
+            Axis_RA__driver_enable(axis_RA, false);
+            axis_RA->isRunning = false;
+        } else {
+            printf("[%s][%dms] Already stopped \n", pcTaskGetTaskName(NULL), xTaskGetTickCount() * 10);
+        }
         break;
     case Error:
-        printf("[%d] ERROR TRACKER\n", xTaskGetTickCount());
-        ESP_ERROR_CHECK(esp_timer_stop(tracker_timer));
-        Axis_RA__driver_enable(axis_RA, false);
+        if (axis_RA->isRunning) {
+            ESP_ERROR_CHECK(esp_timer_stop(tracker_timer));
+            Axis_RA__driver_enable(axis_RA, false);
+            axis_RA->isRunning = false;
+        }
+        ESP_LOGE("TSK_tracker", "[%s][%dms] ERROR \n", pcTaskGetTaskName(NULL), xTaskGetTickCount() * 10);
+        break;
+    case Delete:
+        if (axis_RA->isRunning) {
+            ESP_ERROR_CHECK(esp_timer_stop(tracker_timer));
+            ESP_ERROR_CHECK(esp_timer_delete(tracker_timer));
+            Axis_RA__driver_enable(axis_RA, false);
+            axis_RA->isRunning = false;
+        }
+        printf("[%s][%dms] Delete \n", pcTaskGetTaskName(NULL), xTaskGetTickCount() * 10);
+        vTaskDelete(NULL); // maybe need some delay before
         break;
     default:
         ESP_LOGE("TSK_tracker", "Command not supported");
