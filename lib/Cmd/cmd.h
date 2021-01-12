@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Command processing
 
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef CMD_H
+#define CMD_H
 
 #endif

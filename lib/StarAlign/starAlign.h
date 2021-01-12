@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------------------------------
-// GUIDE TASK for moving the mount in any direction at a series of fixed rates
+// ALIGNMENT TASK for periodically correcting tracking errors
 
-#ifndef GUIDE_H
-#define GUIDE_H
+#ifndef STARALIGN_H
+#define STARALIGN_H
 
 #endif

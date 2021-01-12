@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------------------------------
-// GUIDE TASK for moving the mount in any direction at a series of fixed rates
+// PARKING TASK for moving telescope to pre-defined resting positions
 
-#ifndef GUIDE_H
-#define GUIDE_H
+#ifndef PARK_H
+#define PARK_H
 
 #endif
