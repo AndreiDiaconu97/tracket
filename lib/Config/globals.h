@@ -4,19 +4,21 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include "stdbool.h"
+
 // TODO - put here global structs (Axis...etc..)
 
 // Time keeping --------------------------------------------------------------------------------------------------------------------
 // REVIEW
-float sidereal_day           = 86164.1;
-long  siderealTimer          = 0; // counter to issue steps during tracking
-long  PecSiderealTimer       = 0; // time since worm wheel zero index for PEC
-long  guideSiderealTimer     = 0; // counter to issue steps during guiding
-long  siderealInterval       = 15956313L;
-long  masterSiderealInterval = siderealInterval; // default = 15956313 ticks per sidereal second, where a tick
-                                                 // is 1/16 uS this is stored in EEPROM which is updated/adjusted
-                                                 // with the ":T+#" and ":T-#" commands a higher number here means
-                                                 // a longer count which slows down the sidereal clock
+float sidereal_day       = 86164.1;
+long  siderealTimer      = 0; // counter to issue steps during tracking
+long  PecSiderealTimer   = 0; // time since worm wheel zero index for PEC
+long  guideSiderealTimer = 0; // counter to issue steps during guiding
+#define siderealInterval 15956313L
+long masterSiderealInterval = siderealInterval; // default = 15956313 ticks per sidereal second, where a tick
+                                                // is 1/16 uS this is stored in EEPROM which is updated/adjusted
+                                                // with the ":T+#" and ":T-#" commands a higher number here means
+                                                // a longer count which slows down the sidereal clock
 
 // Location ------------------------------------------------------------------------------------------------------------------------
 // REVIEW

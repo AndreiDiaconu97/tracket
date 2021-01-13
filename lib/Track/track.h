@@ -7,6 +7,6 @@
 #include "config.h"
 #include "globals.h"
 
-
+void taskk();
 
 #endif

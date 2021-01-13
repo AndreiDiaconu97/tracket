@@ -1,5 +1,8 @@
 // Platform setup ------------------------------------------------------------------------------------
 
+#include "driver/timer.h"
+#include "freertos/task.h"
+
 #define HAL_FAST_PROCESSOR           // This is for fast processors with hardware FP
 #define HAL_MAXRATE_LOWER_LIMIT 16   // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 #define HAL_PULSE_WIDTH         2500 // Width of step pulse
@@ -11,19 +14,6 @@
 // SerialB
 #define SerialB Serial2
 #define HAL_SERIAL_B_ENABLED
-
-// SerialC
-#if SERIAL_C_BAUD_DEFAULT != OFF
-    #if SERIAL_C_BAUD_DEFAULT > 0
-        #error "Bluetooth on ESP32 SERIAL_C_BAUD_DEFAULT gets set to ON or OFF only."
-    #endif
-    #include <BluetoothSerial.h>
-BluetoothSerial SerialC;
-    #define HAL_SERIAL_C_ENABLED
-    #define HAL_SERIAL_C_BLUETOOTH
-    #undef SERIAL_C_BAUD_DEFAULT
-    #define SERIAL_C_BAUD_DEFAULT SERIAL_C_BLUETOOTH_NAME
-#endif
 
 // New symbol for the default I2C port ---------------------------------------------------------------
 // #include <Wire.h>
@@ -39,9 +29,9 @@ void HAL_Init(void) {
 
 #define ISR(f) void f(void)
 
-hw_timer_t *itimer1 = NULL;
-hw_timer_t *itimer3 = NULL;
-hw_timer_t *itimer4 = NULL;
+timer_t *itimer1 = NULL;
+timer_t *itimer3 = NULL;
+timer_t *itimer4 = NULL;
 
 void TIMER1_COMPA_vect(void);
 void TIMER3_COMPA_vect(void);
@@ -80,13 +70,7 @@ void timerAlarmsDisable() {
 }
 
 // Non-volatile storage ------------------------------------------------------------------------------
-#if defined(NV_AT24C32)
-    #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
-#elif defined(NV_MB85RC256V)
-    #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
-#else
-    #include "../drivers/NV_EEPROM_ESP.h"
-#endif
+// ...
 
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
@@ -94,8 +78,8 @@ void timerAlarmsDisable() {
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
 #define F_COMP 16000000.0
 
-extern long int siderealInterval;
-extern void     SiderealClockSetInterval(long int);
+extern long siderealInterval;
+extern void SiderealClockSetInterval(long int);
 
 // Init Axis1 and Axis2 motor timers and set their priorities
 void HAL_Init_Timers_Motor() {
@@ -162,17 +146,17 @@ IRAM_ATTR void QuickSetIntervalAxis2(uint32_t r) {
 // --------------------------------------------------------------------------------------------------
 // Fast port writing help
 
-#define CLR(x, y) (x &= (~(1 << y)))
-#define SET(x, y) (x |= (1 << y))
-#define TGL(x, y) (x ^= (1 << y))
+// #define CLR(x, y) (x &= (~(1 << y)))
+// #define SET(x, y) (x |= (1 << y))
+// #define TGL(x, y) (x ^= (1 << y))
 
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
-#define Axis1StepPinHIGH digitalWrite(Axis1StepPin, HIGH)
-#define Axis1StepPinLOW  digitalWrite(Axis1StepPin, LOW)
-#define Axis1DirPinHIGH  digitalWrite(Axis1DirPin, HIGH)
-#define Axis1DirPinLOW   digitalWrite(Axis1DirPin, LOW)
+// #define Axis1StepPinHIGH digitalWrite(Axis1StepPin, HIGH)
+// #define Axis1StepPinLOW  digitalWrite(Axis1StepPin, LOW)
+// #define Axis1DirPinHIGH  digitalWrite(Axis1DirPin, HIGH)
+// #define Axis1DirPinLOW   digitalWrite(Axis1DirPin, LOW)
 
-#define Axis2StepPinHIGH digitalWrite(Axis2StepPin, HIGH)
-#define Axis2StepPinLOW  digitalWrite(Axis2StepPin, LOW)
-#define Axis2DirPinHIGH  digitalWrite(Axis2DirPin, HIGH)
-#define Axis2DirPinLOW   digitalWrite(Axis2DirPin, LOW)
+// #define Axis2StepPinHIGH digitalWrite(Axis2StepPin, HIGH)
+// #define Axis2StepPinLOW  digitalWrite(Axis2StepPin, LOW)
+// #define Axis2DirPinHIGH  digitalWrite(Axis2DirPin, HIGH)
+// #define Axis2DirPinLOW   digitalWrite(Axis2DirPin, LOW)

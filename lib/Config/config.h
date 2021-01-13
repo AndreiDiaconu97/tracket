@@ -4,10 +4,12 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define DEBUG_ON // DEBUG_ON or DEBUG_OFF
+#include "stdbool.h"
 
 #define OFF -1
 #define ON  -2
+
+#define DEBUG_ON // DEBUG_ON or DEBUG_OFF
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // PIN MAP
@@ -39,10 +41,10 @@ PINS NOT RECOMMENDED AS GPIO
 
 // AXIS1 RA/AZM
 // see https://onstep.groups.io/g/main/wiki/6-Configuration#AXIS1
-#define AXIS1_STEPS_PER_DEGREE  12800.0 //  	Number of steps per degree:                                        				<-Req'd \
-                                       //  	n = (stepper_steps * micro_steps * overall_gear_reduction)/360.0
-#define AXIS1_STEPS_PER_WORMROT 12800   //  	n. Number of steps per worm rotation (PEC Eq mode only:)               		 	<-Req'd \
-                                       //	n = (AXIS1_STEPS_PER_DEGREE*360)/reduction_final_stage
+#define AXIS1_STEPS_PER_DEGREE 12800.0 //   Number of steps per degree:                                        				<-Req'd
+//                                          n = (stepper_steps * micro_steps * overall_gear_reduction)/360.0
+#define AXIS1_STEPS_PER_WORMROT 12800 //    n. Number of steps per worm rotation (PEC Eq mode only:)               		 	<-Req'd
+//                                          n = (AXIS1_STEPS_PER_DEGREE*360)/reduction_final_stage
 
 #define AXIS1_DRIVER_MODEL           OFF //    OFF, (See above.) Stepper driver model.                                      <-Often
 #define AXIS1_DRIVER_MICROSTEPS      OFF //    OFF, n. Microstep mode when tracking.                                        <-Often
@@ -58,8 +60,8 @@ PINS NOT RECOMMENDED AS GPIO
 
 // AXIS2 DEC/ALT
 // see https://onstep.groups.io/g/main/wiki/6-Configuration#AXIS2
-#define AXIS2_STEPS_PER_DEGREE 12800.0 //  12800, n. Number of steps per degree:                                          <-Req'd \
-                                       //         n = (stepper_steps * micro_steps * overall_gear_reduction)/360.0
+#define AXIS2_STEPS_PER_DEGREE 12800.0 //   12800, n. Number of steps per degree:                                          <-Req'd
+//                                          n = (stepper_steps * micro_steps * overall_gear_reduction)/360.0
 
 #define AXIS2_DRIVER_MODEL           OFF //    OFF, (See above.) Stepper driver model.                                      <-Often
 #define AXIS2_DRIVER_MICROSTEPS      OFF //    OFF, n. Microstep mode when tracking.                                        <-Often
@@ -77,16 +79,16 @@ PINS NOT RECOMMENDED AS GPIO
 
 // TRACKING BEHAVIOUR -------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#TRACKING
 #define TRACK_AUTOSTART     OFF //    OFF, ON Start with tracking enabled.                                          Option
-#define TRACK_BACKLASH_RATE 25  //     25, n. Where n=2..50 (x sidereal rate) during backlash takeup.               Option \
-                                //         Too fast motors stall/gears slam or too slow and sluggish in backlash.
+#define TRACK_BACKLASH_RATE 25  //    25, n. Where n=2..50 (x sidereal rate) during backlash takeup.               Option
+//                                    Too fast motors stall/gears slam or too slow and sluggish in backlash.
 
 // SLEWING BEHAVIOUR ---------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#SLEWING
-#define SLEW_RATE_BASE_DESIRED 1.0 //    1.0, n. Desired slew rate in deg/sec. Adjustable at run-time from            <-Req'd \
-                                   //         1/2 to 2x this rate, and as MCU performace considerations require.
+#define SLEW_RATE_BASE_DESIRED 1.0 //    1.0, n. Desired slew rate in deg/sec. Adjustable at run-time from            <-Req'd
+//                                       1/2 to 2x this rate, and as MCU performace considerations require.
 #define SLEW_RATE_MEMORY       OFF //    OFF, ON Remembers rates set across power cycles.                              Option
 #define SLEW_ACCELERATION_DIST 5.0 //    5.0, n, (degrees.) Approx. distance for acceleration (and deceleration.)      Adjust
-#define SLEW_RAPID_STOP_DIST   2.5 //    2.0, n, (degrees.) Approx. distance required to stop when a slew              Adjust \
-                                   //         is aborted or a limit is exceeded.
+#define SLEW_RAPID_STOP_DIST   2.5 //    2.0, n, (degrees.) Approx. distance required to stop when a slew              Adjust
+//                                       is aborted or a limit is exceeded.
 
 #define MFLIP_SKIP_HOME         OFF //    OFF, ON Goto directly to the destination without visiting home position.      Option
 #define MFLIP_PAUSE_HOME_MEMORY OFF //    OFF, ON Remember meridian flip pause at home setting across power cycles.     Option
