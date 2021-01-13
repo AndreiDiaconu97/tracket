@@ -4,6 +4,8 @@
 #ifndef VALIDATE_H
 #define VALIDATE_H
 
+#include "config.h"
+
 // Check pin settings
 #if !defined(AXIS_RA_PIN_DIR) || !defined(AXIS_RA_PIN_STEP) || !defined(AXIS_RA_PIN_ENABLE) || !defined(AXIS_RA_PIN_UART)
     #error "Config.h: AXIS_RA have missing settings!"

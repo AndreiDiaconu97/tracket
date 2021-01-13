@@ -4,4 +4,9 @@
 #ifndef TRACK_H
 #define TRACK_H
 
+#include "config.h"
+#include "globals.h"
+
+
+
 #endif
