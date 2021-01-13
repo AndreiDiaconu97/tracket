@@ -1,0 +1,12 @@
+Tracker:
+	How many timers?
+		1 for sidereal time, 1 for RA and 1 for DEC?
+		or 1 for everything?
+	☐ implement base timers @critical
+		☐ study about hardware timers
+			☐ timer max freqs
+			☐ timer groups
+			☐ manage critical areas
+Other:
+	☐ evaluate use of object oriented strucutre
+	☐ evaluate use of FreeRTOS tasks

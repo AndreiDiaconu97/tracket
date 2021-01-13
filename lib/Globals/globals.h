@@ -10,23 +10,23 @@
 
 // Time keeping --------------------------------------------------------------------------------------------------------------------
 // REVIEW
-float sidereal_day       = 86164.1;
-long  siderealTimer      = 0; // counter to issue steps during tracking
-long  PecSiderealTimer   = 0; // time since worm wheel zero index for PEC
-long  guideSiderealTimer = 0; // counter to issue steps during guiding
-#define siderealInterval 15956313L
-long masterSiderealInterval = siderealInterval; // default = 15956313 ticks per sidereal second, where a tick
-                                                // is 1/16 uS this is stored in EEPROM which is updated/adjusted
-                                                // with the ":T+#" and ":T-#" commands a higher number here means
-                                                // a longer count which slows down the sidereal clock
+extern float sidereal_day;
+extern long  siderealTimer;      // counter to issue steps during tracking
+extern long  PecSiderealTimer;   // time since worm wheel zero index for PEC
+extern long  guideSiderealTimer; // counter to issue steps during guiding
+extern long  siderealInterval;
+extern long  masterSiderealInterval; // default = 15956313 ticks per sidereal second, where a tick
+                                     // is 1/16 uS this is stored in EEPROM which is updated/adjusted
+                                     // with the ":T+#" and ":T-#" commands a higher number here means
+                                     // a longer count which slows down the sidereal clock
 
 // Location ------------------------------------------------------------------------------------------------------------------------
 // REVIEW
-double latitude     = 0.0;
-double latitudeSign = 1.0;
-double cosLat       = 1.0;
-double sinLat       = 0.0;
-double longitude    = 0.0;
+extern double latitude;
+extern double latitudeSign;
+extern double cosLat;
+extern double sinLat;
+extern double longitude;
 
 // Coordinates ---------------------------------------------------------------------------------------------------------------------
 // TODO
@@ -43,13 +43,7 @@ typedef struct {
     int  pos;   // steps (should convert to some astronomical unit)
     int  speed; // step/s (should convert to some astronomical unit)
 } Axis_RA;
-
-Axis_RA axis_RA = {
-    .dir       = false,
-    .isEnabled = false,
-    .isRunning = false,
-    .pos       = 0,
-    .speed     = 10};
+extern Axis_RA axis_RA;
 
 // Tracking: 	none, sidereal, goTo
 // Park status:	not_parked, parking, parked, park_fail, park_unknown
@@ -71,7 +65,7 @@ typedef enum {
     ERR_WEATHER_INIT,
     ERR_SITE_INIT
 } GeneralErrors;
-GeneralErrors generalError = ERR_NONE;
+extern GeneralErrors generalError;
 
 typedef enum {
     CE_NONE,
@@ -100,7 +94,7 @@ typedef enum {
     CE_GOTO_ERR_UNSPECIFIED,
     CE_NULL
 } CommandErrors;
-CommandErrors commandError = CE_NONE;
+extern CommandErrors commandError;
 
 // Guide command -------------------------------------------------------------------------------------------------------------------
 // TODO
