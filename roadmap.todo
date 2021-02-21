@@ -1,12 +1,27 @@
 Tracker:
+	☐ implement base timers @critical
 	How many timers?
 		1 for sidereal time, 1 for RA and 1 for DEC?
 		or 1 for everything?
-	☐ implement base timers @critical
-		☐ study about hardware timers
-			☐ timer max freqs
-			☐ timer groups
-			☐ manage critical areas
+	☐ study about hardware timers
+		https://youtu.be/KWrD1dPTZpQ
+		https://github.com/espressif/esp-idf/blob/2bfdd036b2dbd07004c8e4f2ffc87c728819b737/examples/peripherals/timer_group/main/timer_group_example_main.c
+		☐ timer max freqs
+		☐ timer groups
+		☐ manage critical areas
 Other:
-	☐ evaluate use of object oriented strucutre
-	☐ evaluate use of FreeRTOS tasks
+	☐ evaluate use of object oriented structure (1 class for each lib/feature?)
+	☐ evaluate use of FreeRTOS tasks (make sense if already using object oriented?)
+Learn kewords:
+	C keywords
+	☐ extern
+	☐ volatile
+	☐ virtual vs pure virtual
+	☐ static vs const
+	☐ constexpr
+	ESP-IDF keywords
+	☐ IRAM_ATTR
+	☐ TIMERGN
+	☐ MCPWM (Motor Control PWM) vs LEDC
+
+

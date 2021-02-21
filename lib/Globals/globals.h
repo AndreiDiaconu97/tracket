@@ -4,8 +4,6 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include "stdbool.h"
-
 // TODO - put here global structs (Axis...etc..)
 
 // Time keeping --------------------------------------------------------------------------------------------------------------------

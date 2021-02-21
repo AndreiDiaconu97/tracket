@@ -4,8 +4,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "stdbool.h"
-
 #define OFF -1
 #define ON  -2
 
